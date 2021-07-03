@@ -1,0 +1,17 @@
+{
+	"authors": [
+		"zhad3"
+	],
+	"copyright": "Copyright © 2020, zhad3",
+	"description": "Utility tool that extracts specific files from a GRF",
+	"license": "MIT",
+    "name": "zextractor",
+    "targetPath": "bin",
+    "dependencies": {
+        "zconfig": "~>1.0.0",
+        "zgrf": "~>1.0.4"
+    },
+    "subPackages": [
+        "./configgenerator/"
+    ]
+}

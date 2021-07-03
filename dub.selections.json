@@ -1,0 +1,8 @@
+{
+	"fileVersion": 1,
+	"versions": {
+		"zconfig": "1.0.0",
+		"zencoding": "1.0.0",
+		"zgrf": "1.0.2"
+	}
+}
