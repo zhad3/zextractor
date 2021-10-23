@@ -9,7 +9,7 @@
     "targetPath": "bin",
     "dependencies": {
         "zconfig": "~>1.0.0",
-        "zgrf": "~>1.0.4"
+        "zgrf": "~>1.1.0"
     },
     "subPackages": [
         "./configgenerator/"
