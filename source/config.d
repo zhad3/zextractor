@@ -14,6 +14,9 @@ struct Config
         @Desc("Use original filenames. Whether the extracted files should have the same" ~
                 " lower/uppercase as in the GRF.")
         bool keepLettercase = false;
+        @Desc("Output ascii filenames. If set to true, the output filenames will use the raw " ~
+                "ascii filenames instead of the converted korean utf encoding.")
+        bool outputAscii = false;
         @Desc("Creates a <grf filenames>_filetable.txt that contains the filetable information.")
         bool printFiletable = false;
         @Desc("Directory to place the extracted files into.")

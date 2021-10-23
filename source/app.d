@@ -209,36 +209,51 @@ void extractFiles(ref GRFFiletable files, const Config conf)
 
     foreach (ref file; files)
     {
+
+        string filename;
+
+        import std.utf : toUTF8;
+
+        if (conf.outputAscii)
+        {
+            filename = convertRawNameToString(file.rawName).toUTF8;
+        }
+        else
+        {
+
+            filename = file.name.toUTF8;
+        }
+
         if (conf.verbose)
         {
-            logf_info("[%d/%d] %s", index, files.length, file.name);
+            logf_info("[%d/%d] %s", index, files.length, filename);
             index++;
         }
+
+        import std.path : baseName;
 
         version (Posix)
         {
             import std.array : replace;
 
-            wstring fullpath = file.name.replace("\\"w, "/"w);
-            wstring path = dirName(fullpath);
+            string fullpath = filename.replace("\\"w, "/"w);
+            string path = dirName(fullpath);
         }
         else
         {
-            wstring fullpath = file.name;
-            wstring path = dirName(file.name);
+            string fullpath = filename;
+            string path = dirName(fullpath);
         }
-        import std.utf : toUTF8;
-        import std.path : baseName;
 
-        string utf8path = buildPath(conf.outdir, path.toUTF8);
-        string base = baseName(fullpath).toUTF8;
+        string utf8path = buildPath(conf.outdir, path);
+        string base = baseName(fullpath);
 
         if (!conf.keepLettercase)
         {
             import std.uni : toLower;
 
-            utf8path = utf8path.toLower;
-            base = base.toLower;
+            utf8path = utf8path.asciiToLower;
+            base = base.asciiToLower;
         }
 
         try
@@ -271,6 +286,36 @@ void extractFiles(ref GRFFiletable files, const Config conf)
             logf_error("Couldn't create file \"%s\". Message: %s", base, e.msg);
         }
     }
+}
+
+wstring convertRawNameToString(const ubyte[] rawName) pure @safe
+{
+    import std.array : appender;
+
+    auto app = appender!wstring;
+
+    foreach (const b; rawName)
+    {
+        if (b == 0)
+            break;
+
+        app.put(cast(wchar) b);
+    }
+
+    return app.data;
+}
+
+string asciiToLower(inout string text) nothrow
+{
+    import std.ascii : toLower;
+
+    char[] wasteOfMemory = text.dup;
+
+    foreach (ref c; wasteOfMemory)
+    {
+        c = c.toLower;
+    }
+    return cast(immutable(char)[]) wasteOfMemory;
 }
 
 void printFiles(const string filename, const ref GRFFiletable files)

@@ -5,10 +5,12 @@ An utility tool to extract data from Gravity's GRF/GPF file formats as used by R
 ## Usage
 `./zextractor -h`
 ```
+No protocol specified
 A tool to extract files from one or multiple Gravity Resource Files (GRF)
 -c     --configFile Specific config file to use instead of the default. Default: zextractor.conf
               --grf List of GRF filenames to load. Can contain multiple comma separated values. E.g. rdata.grf,data.grf. In that case rdata.grf would be loaded first. Default: 
    --keepLettercase Use original filenames. Whether the extracted files should have the same lower/uppercase as in the GRF. Default: false
+      --outputAscii Output ascii filenames. If set to true, the output filenames will use the raw ascii filenames instead of the converted korean utf encoding. Default: false
    --printFiletable Creates a <grf filenames>_filetable.txt that contains the filetable information. Default: false
            --outdir Directory to place the extracted files into. Default: output
       --filtersfile Filename of the filters text file to use. Default: filters.txt
@@ -22,9 +24,9 @@ A tool to extract files from one or multiple Gravity Resource Files (GRF)
 - **Extract all files of `data.grf`.**  
 `./zextractor --grf=data.grf`
 - **Extract all textures of `rdata.grf`.**  
-`./zextractor --grf=rdata.grf --filters=data\\texture\\`
+`./zextractor --grf=rdata.grf --filters=data\\texture\\*`
 - **Extract all textures and all sprites of the merged GRF of `rdata.grf` and `data.grf`.**  
-`./zextractor --grf=rdata.grf,data.grf --filters=data\\texture\\,data\\sprite\\`
+`./zextractor --grf=rdata.grf,data.grf --filters=data\\texture\\*,data\\sprite\\*`
 - **Extract the single file `data/model/prontera/oven.rsm` from `data.grf`.**  
 `./zextractor --grf=data.grf --filters=data\\model\\prontera\\oven.rsm`
 - **Do not extract anything, but print the filetable of `data.grf` to `data.grf_filetable.txt`.**  
@@ -39,47 +41,13 @@ Most of the command line arguments are also available as a config file.
 By default the program will try to read `zextractor.conf` in the same directory.
 A custom config file can be specified by the command line argument `--configFile` or `-c` in short.
 
-**Example config:**
-```
-[zextractor]
-; List of GRF filenames to load. Can contain multiple comma separated values.
-; E.g. rdata.grf,data.grf. In that case rdata.grf would be loaded first.
-; Default value: 
-;grf=
+See the [zextractor.example.conf](https://github.com/zhad3/zextractor/blob/main/zextractor.example.conf) file as an example.
 
-; Use original filenames. Whether the extracted files should have the same
-; lower/uppercase as in the GRF.
-; Default value: false
-;keepLettercase=false
-
-; Creates a <grf filenames>_filetable.txt that contains the filetable
-; information.
-; Default value: false
-;printFiletable=false
-
-; Directory to place the extracted files into.
-; Default value: output
-;outdir=output
-
-; Filename of the filters text file to use.
-; Default value: filters.txt
-;filtersfile=filters.txt
-
-; Comma separated filters.
-; Default value: 
-;filters=
-
-; Whether to extract any files.
-; Default value: true
-;extract=true
-
-; Verbose log/print statements.
-; Default value: false
-;verbose=false
-
-```
+## Build Requirements
+Please see the requirements of the [zgrf dependency](https://github.com/zhad3/zgrf#building)
 
 ## Building
+
 Run `dub build` to build the program.
 
 Run `dub run :configgenerator` to create the example config file.
