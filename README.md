@@ -5,7 +5,6 @@ An utility tool to extract data from Gravity's GRF/GPF file formats as used by R
 ## Usage
 `./zextractor -h`
 ```
-No protocol specified
 A tool to extract files from one or multiple Gravity Resource Files (GRF)
 -c     --configFile Specific config file to use instead of the default. Default: zextractor.conf
               --grf List of GRF filenames to load. Can contain multiple comma separated values. E.g. rdata.grf,data.grf. In that case rdata.grf would be loaded first. Default: 
@@ -32,9 +31,14 @@ A tool to extract files from one or multiple Gravity Resource Files (GRF)
 - **Do not extract anything, but print the filetable of `data.grf` to `data.grf_filetable.txt`.**  
 `./zextractor --grf=data.grf --extract=false --printFiletable`
 
+## Filters
 If wanting to select multiple very specific files and or directories a filters file can be provided.
 By default the program will look for an `filters.txt` file but can be changed via the `--filtersfile` option.
 Inside the file each line will be treated as a filter in the same way as if it was provided through the `--filters` option with commas.
+
+The filters support glob matching as defined here: https://dlang.org/phobos/std_path.html#globMatch
+
+**Important note:** The filters cannot be in mojibake (e.g. æ–‡å—åŒ–ã‘) but should be properly UTF-8 encoded (e.g. 디제이맥스 테크니카 ).
 
 ## Config
 Most of the command line arguments are also available as a config file.
