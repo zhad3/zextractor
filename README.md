@@ -1,16 +1,17 @@
 # zextractor
 
-An utility tool to extract data from Gravity's GRF/GPF file formats as used by Ragnarok Online.
+An utility tool to extract data from Gravity's GRF/GPF file formats as used by Ragnarok Online as well as Aeomin's THOR patcher files.
 
 ## Usage
 `./zextractor -h`
 ```
-A tool to extract files from one or multiple Gravity Resource Files (GRF)
+A tool to extract files from one or multiple Gravity Resource/Patch Files (GRF,GPF) or THOR files
 -c     --configFile Specific config file to use instead of the default. Default: zextractor.conf
               --grf List of GRF filenames to load. Can contain multiple comma separated values. E.g. rdata.grf,data.grf. In that case rdata.grf would be loaded first. Default: 
+             --thor THOR filename to load. Can only extract one THOR file at a time. Default: 
    --keepLettercase Use original filenames. Whether the extracted files should have the same lower/uppercase as in the GRF. Default: false
       --outputAscii Output ascii filenames. If set to true, the output filenames will use the raw ascii filenames instead of the converted korean utf encoding. Default: false
-   --printFiletable Creates a <grf filenames>_filetable.txt that contains the filetable information. Default: false
+   --printFiletable Creates a <filenames>__filetable.txt that contains the filetable information. Default: false
            --outdir Directory to place the extracted files into. Default: output
       --filtersfile Filename of the filters text file to use. Default: filters.txt
           --filters Comma separated filters. Default: 
@@ -28,8 +29,10 @@ A tool to extract files from one or multiple Gravity Resource Files (GRF)
 `./zextractor --grf=rdata.grf,data.grf --filters=data\\texture\\*,data\\sprite\\*`
 - **Extract the single file `data/model/prontera/oven.rsm` from `data.grf`.**  
 `./zextractor --grf=data.grf --filters=data\\model\\prontera\\oven.rsm`
-- **Do not extract anything, but print the filetable of `data.grf` to `data.grf_filetable.txt`.**  
+- **Do not extract anything, but print the filetable of `data.grf` to `data.grf__filetable.txt`.**  
 `./zextractor --grf=data.grf --extract=false --printFiletable`
+- **Extract all files of `my-patch.thor`.**  
+`./zextractor --thor=my-patch.thor`
 
 ## Filters
 If wanting to select multiple very specific files and or directories a filters file can be provided.

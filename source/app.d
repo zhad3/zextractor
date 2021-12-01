@@ -1,10 +1,11 @@
-import std.getopt;
-import logger;
-import zgrf : VirtualGRF, GRF;
 import config;
+import logger;
+import std.getopt;
 import zconfig : initializeConfig, getConfigArguments;
+import zgrf : VirtualGRF, GRF, GRFFiletable;
+import zthor : THOR, THORFiletable;
 
-enum usage = "A tool to extract files from one or multiple Gravity Resource Files (GRF)";
+enum usage = "A tool to extract files from one or multiple Gravity Resource/Patch Files (GRF,GPF) or THOR files";
 
 int main(string[] args)
 {
@@ -36,9 +37,9 @@ int main(string[] args)
         return 0;
     }
 
-    if (config.grf.length == 0)
+    if (config.grf.length == 0 && config.thor.length == 0)
     {
-        log_fatal("No GRFs to load.");
+        log_fatal("No files to load.");
         return 1;
     }
 
@@ -72,10 +73,10 @@ int main(string[] args)
         loadGRF!VirtualGRF(grf, config, filters);
         if (config.extract)
         {
-            extractFiles(grf.files, config);
+            extractFiles!GRFFiletable(grf.files, config);
         }
     }
-    else
+    else if (config.grf.length == 1)
     {
         import zgrf : close;
 
@@ -94,7 +95,31 @@ int main(string[] args)
         loadGRF!GRF(grf, config, filters);
         if (config.extract)
         {
-            extractFiles(grf.files, config);
+            extractFiles!GRFFiletable(grf.files, config);
+        }
+    }
+
+    if (config.thor.length > 0)
+    {
+        import zthor : close;
+
+        THOR thor;
+        scope (exit)
+            thor.close();
+
+        try
+        {
+            thor = THOR(config.thor);
+        }
+        catch (Exception e)
+        {
+            logf_fatal("Couldn't open THOR file. Message: %s", e.msg);
+            return 1;
+        }
+        loadTHOR(thor, config, filters);
+        if (config.extract)
+        {
+            extractFiles!THORFiletable(thor.files, config);
         }
     }
 
@@ -151,40 +176,78 @@ wstring[] parseFilters(const string filtersfile)
 ref T loadGRF(T)(return ref T grf, const Config conf, const(wstring)[] filters)
         if (is(T == VirtualGRF) || is(T == GRF))
 {
+    import core.time : MonoTime;
     import zgrf : parse;
+
+    log_info("Parsing GRFs and loading filetables...");
+    auto startTime = MonoTime.currTime;
 
     grf.parse(filters);
 
+    auto elapsed = MonoTime.currTime - startTime;
+    logf_info("Finished loading filetables with a total of %d files after %s", grf.files.length, elapsed);
+
     if (conf.printFiletable)
     {
+        import std.path : baseName;
+
         string filename;
         static if (is(T == VirtualGRF))
         {
             foreach (const ref g; grf.grfs)
             {
-                filename ~= g.filename;
+                filename ~= baseName(g.filename);
             }
         }
         else static if (is(T == GRF))
         {
-            filename = grf.filename;
+            filename = baseName(grf.filename);
         }
-        filename ~= "_filetable.txt";
+        filename ~= "__filetable.txt";
 
         logf_info("Writing filetable to %s", filename);
-        printFiles(filename, grf.files);
+        printGRFFiles(filename, grf.files);
     }
 
     return grf;
 }
 
-import zgrf : GRFFiletable;
-
-void extractFiles(ref GRFFiletable files, const Config conf)
+ref THOR loadTHOR(return ref THOR thor, const Config conf, const(wstring)[] filters)
 {
+    import core.time : MonoTime;
+    import zthor : parse;
+
+    log_info("Parsing THOR and loading filetable...");
+    auto startTime = MonoTime.currTime;
+
+    thor.parse(filters);
+
+    auto elapsed = MonoTime.currTime - startTime;
+    logf_info("Finished loading filetable with %d files after %s", thor.files.length, elapsed);
+
+    if (conf.printFiletable)
+    {
+        import std.path : baseName;
+
+        string filename = baseName(thor.filename) ~ "__filetable.txt";
+
+        logf_info("Writing filetable to %s", filename);
+        printTHORFiles(filename, thor.files);
+    }
+    return thor;
+}
+
+
+void extractFiles(T)(ref T files, const Config conf)
+    if (is(T == GRFFiletable) || is(T == THORFiletable))
+{
+    import core.time : MonoTime;
     import std.file : exists, isDir, mkdirRecurse, FileException;
     import std.path : dirSeparator, dirName, buildPath;
     import zgrf : GRFFile;
+    import zthor : THORFile;
+
+    log_info("Extracting files...");
 
     if (!exists(conf.outdir))
     {
@@ -203,6 +266,13 @@ void extractFiles(ref GRFFiletable files, const Config conf)
     {
         logf_error("Output directory \"%s\" is not a directory.", conf.outdir);
         return;
+    }
+
+    auto startTime = MonoTime.currTime;
+    scope (exit)
+    {
+        auto elapsed = MonoTime.currTime - startTime;
+        logf_info("Finished extracting after %s", elapsed);
     }
 
     ulong index = 1;
@@ -273,9 +343,30 @@ void extractFiles(ref GRFFiletable files, const Config conf)
         {
             import std.stdio : File;
             import std.typecons : No;
-            import zgrf : getFileData;
 
-            scope data = getFileData(*file.grf, file, No.useCache);
+            static if (is(T == GRFFiletable))
+            {
+                import zgrf : getFileData;
+
+                scope data = getFileData(*file.grf, file, No.useCache);
+            }
+            else static if (is(T == THORFiletable))
+            {
+                import zthor : FileFlags;
+
+                scope ubyte[] data;
+
+                if (!(file.flags & FileFlags.remove))
+                {
+                    import zthor : getFileData;
+
+                    data = getFileData(*file.thor, file, No.useCache);
+                }
+                else if (conf.verbose)
+                {
+                    logf_info("%s has 'remove' flag. Nothing to extract.", file.name);
+                }
+            }
 
             auto f = File(buildPath(utf8path, base), "w+");
             f.rawWrite(data);
@@ -318,7 +409,7 @@ string asciiToLower(inout string text) nothrow
     return cast(immutable(char)[]) wasteOfMemory;
 }
 
-void printFiles(const string filename, const ref GRFFiletable files)
+void printGRFFiles(const string filename, const ref GRFFiletable files)
 {
     import std.stdio : File;
 
@@ -368,3 +459,52 @@ void printFiles(const string filename, const ref GRFFiletable files)
         f.write(app.data);
     }
 }
+
+void printTHORFiles(const string filename, const ref THORFiletable files)
+{
+    import std.stdio : File;
+
+    auto f = File(filename, "w+");
+    scope (exit)
+        f.close();
+
+    import zthor : THORFile;
+
+    foreach (const ref file; files)
+    {
+        import std.array : appender;
+        import std.format : formattedWrite;
+
+        auto app = appender!wstring;
+
+        app.put("============\n");
+        app.put("Filename (ASCII): ");
+        foreach (const b; file.rawName)
+        {
+            if (b == 0)
+                break;
+
+            app.put(cast(wchar) b);
+        }
+        app.put("\n");
+
+        app.formattedWrite("Filename: %s\n", file.name);
+        app.formattedWrite("Hash (CRC32): %X\n", file.hash);
+        app.formattedWrite("Filesize: %s bytes\n", file.size);
+        app.formattedWrite("Filesize (compressed): %s bytes\n", file.compressed_size);
+        app.formattedWrite("Flags: %d", file.flags);
+        import zthor : FileFlags;
+
+        if (file.flags == 0)
+            app.put(" ADD");
+        if (file.flags & FileFlags.remove)
+            app.put(" REMOVE");
+        app.put("\n");
+        app.formattedWrite("Offset: %d\n", file.offset);
+        app.formattedWrite("THOR: %s\n", file.thor.filename);
+
+        f.write(app.data);
+    }
+}
+
+

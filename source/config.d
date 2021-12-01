@@ -11,13 +11,15 @@ struct Config
         @Desc("List of GRF filenames to load. Can contain multiple comma separated values. " ~
                 "E.g. rdata.grf,data.grf. In that case rdata.grf would be loaded first.")
         string[] grf = [];
+        @Desc("THOR filename to load. Can only extract one THOR file at a time.")
+        string thor;
         @Desc("Use original filenames. Whether the extracted files should have the same" ~
                 " lower/uppercase as in the GRF.")
         bool keepLettercase = false;
         @Desc("Output ascii filenames. If set to true, the output filenames will use the raw " ~
                 "ascii filenames instead of the converted korean utf encoding.")
         bool outputAscii = false;
-        @Desc("Creates a <grf filenames>_filetable.txt that contains the filetable information.")
+        @Desc("Creates a <filenames>__filetable.txt that contains the filetable information.")
         bool printFiletable = false;
         @Desc("Directory to place the extracted files into.")
         string outdir = "output";
