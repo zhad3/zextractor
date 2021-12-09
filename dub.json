@@ -6,6 +6,7 @@
 	"description": "Utility tool that extracts specific files from a GRF",
 	"license": "MIT",
     "name": "zextractor",
+    "targetType": "executable",
     "targetPath": "bin",
     "dependencies": {
         "zconfig": "~>1.0.0",
@@ -14,5 +15,12 @@
     },
     "subPackages": [
         "./configgenerator/"
+    ],
+    "configurations": [
+        { "name": "default" },
+        {
+            "name": "docker",
+            "dflags": ["-link-defaultlib-shared=false"]
+        }
     ]
 }
