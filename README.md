@@ -50,6 +50,17 @@ A custom config file can be specified by the command line argument `--configFile
 
 See the [zextractor.example.conf](https://github.com/zhad3/zextractor/blob/main/zextractor.example.conf) file as an example.
 
+## Docker
+This tool is also available as a Container. Most likely you want to mount some input and some output directory. An example would be:
+```
+docker run --rm \
+    -v <directory_with_grfs>:/zext/input \
+    -v <output_directory>:/zext/output \
+    -v my-filters.txt:/zext/filters.txt \
+    zextractor --grf=input/data.grf
+```
+This command would extract any files from `data.grf` inside the `<directory_with_grfs>` folder that match the filters in the `my-filters.txt` file and write the output to the `<output_directory>` folder.
+
 ## Build Requirements
 Please see the requirements of the [zgrf dependency](https://github.com/zhad3/zgrf#building)
 
