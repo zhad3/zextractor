@@ -57,7 +57,7 @@ docker run --rm \
     -v <directory_with_grfs>:/zext/input \
     -v <output_directory>:/zext/output \
     -v my-filters.txt:/zext/filters.txt \
-    zextractor --grf=input/data.grf
+    zhade/zextractor --grf=input/data.grf
 ```
 This command would extract any files from `data.grf` inside the `<directory_with_grfs>` folder that match the filters in the `my-filters.txt` file and write the output to the `<output_directory>` folder.
 
