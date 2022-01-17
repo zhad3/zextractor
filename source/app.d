@@ -246,6 +246,7 @@ void extractFiles(T)(ref T files, const Config conf)
     import std.path : dirSeparator, dirName, buildPath;
     import zgrf : GRFFile;
     import zthor : THORFile;
+    import std.zlib : ZlibException;
 
     log_info("Extracting files...");
 
@@ -375,6 +376,13 @@ void extractFiles(T)(ref T files, const Config conf)
         catch (ErrnoException e)
         {
             logf_error("Couldn't create file \"%s\". Message: %s", base, e.msg);
+        }
+        catch (ZlibException e)
+        {
+            logf_error("Couldn't extract file \"%s\" due to a zlib error. Message: %s", filename, e.msg);
+        }
+        catch (Exception e) {
+            logf_error("An error occurred extracting the file \"%s\". Message: %s", filename, e.msg);
         }
     }
 }
