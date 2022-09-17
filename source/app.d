@@ -446,7 +446,6 @@ void printGRFFiles(const string filename, const ref GRFFiletable files)
         app.put("\n");
 
         app.formattedWrite("Filename: %s\n", file.name);
-        app.formattedWrite("Hash (CRC32): %X\n", file.hash);
         app.formattedWrite("Filesize: %s bytes\n", file.size);
         app.formattedWrite("Filesize (compressed): %s bytes\n", file.compressed_size);
         app.formattedWrite("Filesize (compressed, padded): %s bytes\n", file.compressed_size_padded);
@@ -497,7 +496,6 @@ void printTHORFiles(const string filename, const ref THORFiletable files)
         app.put("\n");
 
         app.formattedWrite("Filename: %s\n", file.name);
-        app.formattedWrite("Hash (CRC32): %X\n", file.hash);
         app.formattedWrite("Filesize: %s bytes\n", file.size);
         app.formattedWrite("Filesize (compressed): %s bytes\n", file.compressed_size);
         app.formattedWrite("Flags: %d", file.flags);

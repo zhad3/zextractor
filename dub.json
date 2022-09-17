@@ -9,9 +9,9 @@
     "targetType": "executable",
     "targetPath": "bin",
     "dependencies": {
-        "zconfig": "~>1.0.0",
-        "zgrf": "~>1.1.0",
-        "zthor": "~>1.0.1"
+        "zconfig": ">=1.0.0",
+        "zgrf": ">=2.0.0",
+        "zthor": ">=2.0.0"
     },
     "subPackages": [
         "./configgenerator/"
