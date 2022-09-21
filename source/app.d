@@ -1,9 +1,10 @@
 import config;
 import logger;
+import filetable;
 import std.getopt;
 import zconfig : initializeConfig, getConfigArguments;
-import zgrf : VirtualGRF, GRF, GRFFiletable;
-import zthor : THOR, THORFiletable;
+import zgrf : VirtualGRF, GRF, GRFFile, GRFFiletable;
+import zthor : THOR, THORFile, THORFiletable;
 
 enum usage = "A tool to extract files from one or multiple Gravity Resource/Patch Files (GRF,GPF) or THOR files";
 
@@ -42,6 +43,19 @@ int main(string[] args)
         log_fatal("No files to load.");
         return 1;
     }
+    if (config.patchMode)
+    {
+        if (config.patchPriority.length == 0)
+        {
+            log_fatal("PatchMode enabled but no PatchPriority set");
+            return 1;
+        }
+        if (config.patchTarget == string.init)
+        {
+            log_fatal("PatchMode enabled but no PatchTarget set");
+            return 1;
+        }
+    }
 
     auto filters = parseFilters(config.filtersfile);
 
@@ -53,6 +67,23 @@ int main(string[] args)
     logf_info(filters.length > 0, "Loaded filters: %(%s, %)", filters);
 
     import std.exception : ErrnoException;
+    import std.path : buildPath;
+
+    Filetable patchFiletable;
+    immutable(string) filetableFilename = config.patchMode && config.patchFiletable != string.init ? config.patchFiletable : buildPath(config.outdir, "zextractor_filetable.dat");
+
+    if (config.patchMode)
+    {
+        import std.file : exists;
+        if (exists(filetableFilename))
+        {
+            patchFiletable = loadFiletable(filetableFilename);
+        }
+        foreach (i, priority; config.patchPriority)
+        {
+            patchFiletable.priority[priority] = cast(int)(config.patchPriority.length - i);
+        }
+    }
 
     if (config.grf.length > 1)
     {
@@ -71,9 +102,18 @@ int main(string[] args)
             return 1;
         }
         loadGRF!VirtualGRF(grf, config, filters);
+        if (config.writePatchFiletable && !config.patchMode)
+        {
+            saveFiletable(grf.files, filetableFilename);
+        }
+        else if (config.patchMode)
+        {
+            addNewFiles(patchFiletable, grf.files, config.patchTarget);
+            saveFiletable(patchFiletable, filetableFilename);
+        }
         if (config.extract)
         {
-            extractFiles!GRFFiletable(grf.files, config);
+            extractFiles!GRFFiletable(grf.files, config, patchFiletable);
         }
     }
     else if (config.grf.length == 1)
@@ -93,9 +133,18 @@ int main(string[] args)
             return 1;
         }
         loadGRF!GRF(grf, config, filters);
+        if (config.writePatchFiletable && !config.patchMode)
+        {
+            saveFiletable(grf.files, filetableFilename);
+        }
+        else if (config.patchMode)
+        {
+            addNewFiles(patchFiletable, grf.files, config.patchTarget);
+            saveFiletable(patchFiletable, filetableFilename);
+        }
         if (config.extract)
         {
-            extractFiles!GRFFiletable(grf.files, config);
+            extractFiles!GRFFiletable(grf.files, config, patchFiletable);
         }
     }
 
@@ -117,9 +166,18 @@ int main(string[] args)
             return 1;
         }
         loadTHOR(thor, config, filters);
+        if (config.writePatchFiletable && !config.patchMode)
+        {
+            saveFiletable(thor.files, filetableFilename);
+        }
+        else if (config.patchMode)
+        {
+            addNewFiles(patchFiletable, thor.files, config.patchTarget);
+            saveFiletable(patchFiletable, filetableFilename);
+        }
         if (config.extract)
         {
-            extractFiles!THORFiletable(thor.files, config);
+            extractFiles!THORFiletable(thor.files, config, patchFiletable);
         }
     }
 
@@ -237,8 +295,13 @@ ref THOR loadTHOR(return ref THOR thor, const Config conf, const(wstring)[] filt
     return thor;
 }
 
-
 void extractFiles(T)(ref T files, const Config conf)
+    if (is(T == GRFFiletable) || is(T == THORFiletable))
+{
+    extractFiles!T(files, conf, Filetable.init);
+}
+
+void extractFiles(T)(ref T files, const Config conf, const Filetable patchFiletable)
     if (is(T == GRFFiletable) || is(T == THORFiletable))
 {
     import core.time : MonoTime;
@@ -280,7 +343,6 @@ void extractFiles(T)(ref T files, const Config conf)
 
     foreach (ref file; files)
     {
-
         string filename;
 
         import std.utf : toUTF8;
@@ -291,8 +353,29 @@ void extractFiles(T)(ref T files, const Config conf)
         }
         else
         {
-
             filename = file.name.toUTF8;
+        }
+
+        if (conf.patchMode)
+        {
+            static if (is(T == GRFFiletable))
+            {
+                auto fileOrigin = conf.patchTarget == string.init ? file.grf.filename : conf.patchTarget;
+            }
+            else
+            {
+                auto fileOrigin = conf.patchTarget == string.init ? file.thor.header.grfTargetName : conf.patchTarget;
+            }
+
+            if (!equalOrHigherPriority(file.name, fileOrigin, patchFiletable))
+            {
+                if (conf.verbose)
+                {
+                    logf_info("[%d/%d] Low Priority: %s", index, files.length, filename);
+                    index++;
+                }
+                continue;
+            }
         }
 
         if (conf.verbose)
@@ -512,5 +595,4 @@ void printTHORFiles(const string filename, const ref THORFiletable files)
         f.write(app.data);
     }
 }
-
 

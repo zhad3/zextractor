@@ -32,5 +32,26 @@ struct Config
         @Short("v") @Desc("Verbose log/print statements.")
         bool verbose = false;
     }
+    @Section("patch-mode")
+    {
+        @Desc("Enable PatchMode. In PatchMode a separate filetable will be generated that keeps " ~
+                "track of which GRF the extracted files belong to. This filetable will be consulted " ~
+                "when extracting files from e.g. a patch file to make sure that no files are " ~
+                "overwritten that belong to a GRF which is considered higher priority.")
+        bool patchMode = false;
+        @Desc("Write a patch filetable. If set to true it will create a patch filetable " ~
+                "even if PatchMode is disabled. If PatchMode is enabled this setting is " ~
+                "automatically set to true.")
+        bool writePatchFiletable = false;
+        @Desc("Priority list of GRF filenames for PatchMode. First entry has highest priority, " ~
+                "followed by second and so on.")
+        string[] patchPriority = [];
+        @Desc("Use a specific filetable for PatchMode. If none is provided a default filetable " ~
+                "called 'zextractor_filetable.dat' will be used in the 'outdir' directory.")
+        string patchFiletable;
+        @Desc("Target GRF of the input patch files. Specifying this will treat all files in the " ~
+                "patch file as if they are supposed to be saved to the target GRF.")
+        string patchTarget;
+    }
 }
 
