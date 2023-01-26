@@ -453,7 +453,10 @@ void extractFiles(T)(ref T files, const Config conf, const Filetable patchFileta
             }
 
             auto f = File(buildPath(utf8path, base), "w+");
-            f.rawWrite(data);
+            if (data.length > 0)
+            {
+                f.rawWrite(data);
+            }
             f.close();
         }
         catch (ErrnoException e)
