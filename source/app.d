@@ -432,7 +432,7 @@ void extractFiles(T)(ref T files, const Config conf, const Filetable patchFileta
             {
                 import zgrf : getFileData;
 
-                scope data = getFileData(*file.grf, file, No.useCache);
+                scope data = file.size == 0 ? [] : getFileData(*file.grf, file, No.useCache);
             }
             else static if (is(T == THORFiletable))
             {
@@ -444,7 +444,7 @@ void extractFiles(T)(ref T files, const Config conf, const Filetable patchFileta
                 {
                     import zthor : getFileData;
 
-                    data = getFileData(*file.thor, file, No.useCache);
+                    data = file.size == 0 ? [] : getFileData(*file.thor, file, No.useCache);
                 }
                 else if (conf.verbose)
                 {
