@@ -39,7 +39,7 @@ A tool to extract files from one or multiple Gravity Resource/Patch Files (GRF,G
 `./zextractor --grf=data.grf --extract=false --printFiletable`
 - **Extract all files of `my-patch.thor`.**  
 `./zextractor --thor=my-patch.thor`
-- **Extract GRFEditor encrypted `custom.grf (also works for encrypted Thor files)`.**--
+- **Extract GRFEditor encrypted `custom.grf` (also works for encrypted Thor files).**  
 `./zextractor --grf=custom.grf --grfEditorPassword=my-secret-password`
 
 ## Filters
