@@ -29,6 +29,8 @@ struct Config
         wstring[] filters = [];
         @Desc("Whether to extract any files.")
         bool extract = true;
+        @Desc("Password used for GRFEditor encryption.")
+        string grfEditorPassword;
         @Short("v") @Desc("Verbose log/print statements.")
         bool verbose = false;
     }

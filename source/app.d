@@ -85,6 +85,12 @@ int main(string[] args)
         }
     }
 
+    import zgrf.crypto.grfeditor : generateKey;
+    import std.string : representation;
+    ubyte[] grfEditorKey = config.grfEditorPassword !is null && config.grfEditorPassword.length >= 4
+        ? generateKey(config.grfEditorPassword.representation)
+        : [];
+
     if (config.grf.length > 1)
     {
         import zgrf : close;
@@ -95,6 +101,12 @@ int main(string[] args)
         try
         {
             grf = VirtualGRF(config.grf);
+
+            if (grfEditorKey.length > 0)
+            {
+                import zgrf : setGRFEditorKey;
+                grf.setGRFEditorKey(grfEditorKey);
+            }
         }
         catch (ErrnoException e)
         {
@@ -126,6 +138,12 @@ int main(string[] args)
         try
         {
             grf = GRF(config.grf[0]);
+
+            if (grfEditorKey.length > 0)
+            {
+                import zgrf : setGRFEditorKey;
+                grf.setGRFEditorKey(grfEditorKey);
+            }
         }
         catch (ErrnoException e)
         {
@@ -159,6 +177,12 @@ int main(string[] args)
         try
         {
             thor = THOR(config.thor);
+
+            if (grfEditorKey.length > 0)
+            {
+                import zthor : setGRFEditorKey;
+                thor.setGRFEditorKey(grfEditorKey);
+            }
         }
         catch (Exception e)
         {

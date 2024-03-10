@@ -6,18 +6,24 @@ An utility tool to extract data from Gravity's GRF/GPF file formats as used by R
 `./zextractor -h`
 ```
 A tool to extract files from one or multiple Gravity Resource/Patch Files (GRF,GPF) or THOR files
--c     --configFile Specific config file to use instead of the default. Default: zextractor.conf
-              --grf List of GRF filenames to load. Can contain multiple comma separated values. E.g. rdata.grf,data.grf. In that case rdata.grf would be loaded first. Default: 
-             --thor THOR filename to load. Can only extract one THOR file at a time. Default: 
-   --keepLettercase Use original filenames. Whether the extracted files should have the same lower/uppercase as in the GRF. Default: false
-      --outputAscii Output ascii filenames. If set to true, the output filenames will use the raw ascii filenames instead of the converted korean utf encoding. Default: false
-   --printFiletable Creates a <filenames>__filetable.txt that contains the filetable information. Default: false
-           --outdir Directory to place the extracted files into. Default: output
-      --filtersfile Filename of the filters text file to use. Default: filters.txt
-          --filters Comma separated filters. Default: 
-          --extract Whether to extract any files. Default: true
--v        --verbose Verbose log/print statements. Default: false
--h           --help This help information.
+-c          --configFile Specific config file to use instead of the default. Default: zextractor.conf
+                   --grf List of GRF filenames to load. Can contain multiple comma separated values. E.g. rdata.grf,data.grf. In that case rdata.grf would be loaded first. Default: 
+                  --thor THOR filename to load. Can only extract one THOR file at a time. Default: 
+        --keepLettercase Use original filenames. Whether the extracted files should have the same lower/uppercase as in the GRF. Default: false
+           --outputAscii Output ascii filenames. If set to true, the output filenames will use the raw ascii filenames instead of the converted korean utf encoding. Default: false
+        --printFiletable Creates a <filenames>__filetable.txt that contains the filetable information. Default: false
+                --outdir Directory to place the extracted files into. Default: output
+           --filtersfile Filename of the filters text file to use. Default: filters.txt
+               --filters Comma separated filters. Default: 
+               --extract Whether to extract any files. Default: true
+     --grfEditorPassword Password used for GRFEditor encryption. Default: 
+-v             --verbose Verbose log/print statements. Default: false
+             --patchMode Enable PatchMode. In PatchMode a separate filetable will be generated that keeps track of which GRF the extracted files belong to. This filetable will be consulted when extracting files from e.g. a patch file to make sure that no files are overwritten that belong to a GRF which is considered higher priority. Default: false
+   --writePatchFiletable Write a patch filetable. If set to true it will create a patch filetable even if PatchMode is disabled. If PatchMode is enabled this setting is automatically set to true. Default: false
+         --patchPriority Priority list of GRF filenames for PatchMode. First entry has highest priority, followed by second and so on. Default: 
+        --patchFiletable Use a specific filetable for PatchMode. If none is provided a default filetable called 'zextractor_filetable.dat' will be used in the 'outdir' directory. Default: 
+           --patchTarget Target GRF of the input patch files. Specifying this will treat all files in the patch file as if they are supposed to be saved to the target GRF. Default: 
+-h                --help This help information.
 ```
 
 ## Examples
@@ -33,6 +39,8 @@ A tool to extract files from one or multiple Gravity Resource/Patch Files (GRF,G
 `./zextractor --grf=data.grf --extract=false --printFiletable`
 - **Extract all files of `my-patch.thor`.**  
 `./zextractor --thor=my-patch.thor`
+- **Extract GRFEditor encrypted `custom.grf (also works for encrypted Thor files)`.**--
+`./zextractor --grf=custom.grf --grfEditorPassword=my-secret-password`
 
 ## Filters
 If wanting to select multiple very specific files and or directories a filters file can be provided.

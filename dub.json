@@ -1,10 +1,10 @@
 {
-	"authors": [
-		"zhad3"
-	],
-	"copyright": "Copyright © 2020, zhad3",
-	"description": "Utility tool that extracts specific files from a GRF",
-	"license": "MIT",
+    "authors": [
+        "zhad3"
+    ],
+    "copyright": "Copyright © 2020, zhad3",
+    "description": "Utility tool that extracts specific files from a GRF",
+    "license": "MIT",
     "name": "zextractor",
     "targetType": "executable",
     "targetPath": "bin",
