@@ -35,31 +35,10 @@ jobs:
           echo "Checking if the provided VERSION is valid: git rev-parse --verify $VERSION"
           git rev-parse --verify "$VERSION"
 
-      - name: Setup dlang
-        uses: dlang-community/setup-dlang@v1.4.0
-        with:
-          compiler: ldc-latest
-
-      - name: Compile
-        shell: cmd
-        run: |
-          call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
-          dub build --build=release --compiler=ldc2
-          dub run --build=release --compiler=ldc2 :configgenerator
-          move "bin\zextractor.exe" "zextractor.exe"
-
       - name: Package
         shell: powershell
         run: |
+          Write-Host ${{ env.VERSION }}
+          Write-Host $env::VERSION
           Compress-Archive -Path zextractor.exe,README.md,zextractor.example.conf -DestinationPath zextractor-windows-x64-${{ env.VERSION }}.zip
-
-      - name: Create Release
-        uses: ncipollo/release-action@v1.14.0
-        with:
-          artifactErrorsFailBuild: true
-          artifacts: zextractor-windows-x64-${{ env.VERSION }}.zip
-          omitBody: true
-          name: ${{ env.VERSION }}
-          tag: ${{ env.VERSION }}
-          token: ${{ secrets.GITHUB_TOKEN }}
 
